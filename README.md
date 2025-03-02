@@ -38,8 +38,10 @@ Clang_format_fallback = Google
 IncludePath for VSCode (optional):
 ```
 "includePath": [
+  "/usr/local/include/node",
   "/opt/homebrew/opt/jsoncpp/include/json",
   "/opt/homebrew/opt/mysql-client/include"
+  "${workspaceFolder}/node_modules/node-addon-api",
 ],
 ```
 You can find code examples <a href="https://github.com/arnelify/arnelify-orm-node/blob/main/src/tests/index.ts">here</a>.
