@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 
-import ArnelifyORMRes from "contracts/res";
-import ArnelifyORM from "../index";
+import { ArnelifyORM, ArnelifyORMRes } from "../index";
 
 (function main(): number {
 
@@ -13,7 +12,7 @@ import ArnelifyORM from "../index";
     "ORM_PASS": "pass",
     "ORM_PORT": 3306
   });
-  
+
   let res: ArnelifyORMRes = {};
 
   db.dropTable("users");

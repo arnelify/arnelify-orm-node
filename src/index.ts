@@ -136,12 +136,12 @@ class ArnelifyORM {
     } else if (typeof default_ === 'boolean') {
       query += ` ${default_ ? 'DEFAULT NULL' : 'NOT NULL'}`;
     } else if (typeof default_ === 'number') {
-      query += `${default_}`;
+      query += ` NOT NULL DEFAULT ${default_}`;
     } else if (typeof default_ === 'string') {
       if (default_ === 'CURRENT_TIMESTAMP') {
-        query += ' DEFAULT CURRENT_TIMESTAMP';
+        query += ' NOT NULL DEFAULT CURRENT_TIMESTAMP';
       } else {
-        query += `'${default_}'`;
+        query += ` NOT NULL DEFAULT '${default_}'`;
       }
     }
 
@@ -288,6 +288,14 @@ class ArnelifyORM {
     }
 
     return res;
+  }
+
+  /**
+   * getUuid
+   * @returns
+   */
+  getUuid(): string {
+    return this.#lib.orm_get_uuid();
   }
 
   /**
@@ -631,12 +639,12 @@ class ArnelifyORM {
    * @param {Array} args
    */
   reference(column: string, tableName: string, foreign: string, args: string[] = []): void {
-    let query: string = `CONSTRAINT fk_${tableName} FOREIGN KEY (${column}) `
+    let query: string = `CONSTRAINT fk_${tableName}_${this.getUuid()} FOREIGN KEY (${column}) `
       + `REFERENCES ${tableName}(${foreign})`;
 
     const isAlter: boolean = this.#query.startsWith('ALTER');
     if (isAlter) {
-      query = `ADD CONSTRAINT fk_${tableName} FOREIGN KEY (${column}) `
+      query = `ADD CONSTRAINT fk_${tableName}_${this.getUuid()} FOREIGN KEY (${column}) `
         + `REFERENCES ${tableName}(${foreign})`;
     }
 
@@ -775,4 +783,5 @@ class ArnelifyORM {
     }
 }
 
-export default ArnelifyORM;
+export type { ArnelifyORMRes };
+export { ArnelifyORM };

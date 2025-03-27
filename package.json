@@ -1,6 +1,6 @@
 {
   "name": "arnelify-orm",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Minimalistic NodeJS (Bun) addon which is an ORM written in C and C++.",
   "keywords": [
     "arnelify",
