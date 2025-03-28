@@ -363,10 +363,11 @@ class ArnelifyORM {
 
     let first: boolean = true;
     for (const key in args) {
-      if (!first) {
+      if (first) {
+        first = false;
+      } else {
         columns += ', ';
         values += ', ';
-        first = false;
       }
 
       columns += key;
@@ -711,17 +712,16 @@ class ArnelifyORM {
    * @returns 
    */
   update(args: {[key: string]: any}): ArnelifyORM {
-    let columns: string = '';
-
     this.#query = 'UPDATE ';
     this.#query += this.#tableName;
     this.#query += ' SET ';
 
     let first: boolean = true;
     for (const key in args) {
-      if (!first) {
-        this.#query += ', ';
+      if (first) {
         first = false;
+      } else {
+        this.#query += ', ';
       }
 
       if (args[key] === null) {
