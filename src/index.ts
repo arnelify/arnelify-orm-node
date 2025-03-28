@@ -262,7 +262,7 @@ class ArnelifyORM {
    * @param {Array} bindings 
    * @returns 
    */
-  exec(query: null | string = null, bindings: string[] = []): ArnelifyORMRes {
+  async exec(query: null | string = null, bindings: string[] = []): Promise<ArnelifyORMRes> {
     let serialized: string = '';
     if (!query) {
       serialized = this.#lib.orm_exec(this.#query, JSON.stringify(this.#bindings));
@@ -356,7 +356,7 @@ class ArnelifyORM {
    * @param {object} args 
    * @returns 
    */
-  insert(args: { [key: string]: any }): { [key: string]: string } {
+  async insert(args: { [key: string]: any }): Promise<ArnelifyORMRes> {
     this.#query = `INSERT INTO ${this.#tableName}`;
     let columns: string = '';
     let values: string = '';
@@ -432,7 +432,7 @@ class ArnelifyORM {
    * @param {number} offset 
    * @returns 
    */
-  limit(limit_: number, offset: number = 0): ArnelifyORMRes {
+  async limit(limit_: number, offset: number = 0): Promise<ArnelifyORMRes> {
     if (offset > 0) {
       this.#query += ` LIMIT ${offset}, ${limit_}`;
       return this.exec();
@@ -626,7 +626,7 @@ class ArnelifyORM {
    * @param {string} query 
    * @returns 
    */
-  raw(query: string): { [key: string]: string } {
+  async raw(query: string): Promise<ArnelifyORMRes> {
     this.#query = query;
     return this.exec();
   }
