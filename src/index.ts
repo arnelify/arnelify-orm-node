@@ -31,9 +31,8 @@ class ArnelifyORM {
    * @param {null | number | string} arg3 
    * @returns 
    */
-  #condition(column: string,
-    arg2: null | number | string,
-    arg3: null | number | string = null): void {
+  #condition(bind: boolean = true, column: string,
+    arg2: null | number | string, arg3: null | number | string = null): void {
     if (this.#isOperator(arg2)) {
       const operator_: string = String(arg2);
       if (arg3 === null) {
@@ -42,13 +41,13 @@ class ArnelifyORM {
       }
 
       if (typeof arg3 === 'number') {
-        this.#query += `${column} ${operator_} ${arg3}`;
-        this.#bindings.push(`${arg3}`);
+        this.#query += `${column} ${operator_} ${bind ? '?' : arg3}`;
+        if (bind) this.#bindings.push(`${arg3}`);
         return;
       }
 
-      this.#query += `${column} ${operator_} ?`;
-      this.#bindings.push(arg3 as string);
+      this.#query += `${column} ${operator_} ${bind ? '?' : arg3}`;
+      if (bind) this.#bindings.push(arg3 as string);
       return;
     }
 
@@ -58,13 +57,13 @@ class ArnelifyORM {
     }
 
     if (typeof arg2 === 'number') {
-      this.#query += `${column} = ?`;
-      this.#bindings.push(`${arg2}`);
+      this.#query += `${column} = ${bind ? '?' : arg2}`;
+      if (bind) this.#bindings.push(`${arg2}`);
       return;
     }
 
-    this.#query += `${column} = ?`;
-    this.#bindings.push(arg2 as string);
+    this.#query += `${column} = ${bind ? '?' : arg2}`;
+    if (bind) this.#bindings.push(arg2 as string);
   }
 
   /**
@@ -246,14 +245,14 @@ class ArnelifyORM {
    * @param {Array} args 
    */
   dropTable(name: string, args: string[] = []) {
-    this.raw('SET foreign_key_checks = 0;');
+    this.exec('SET foreign_key_checks = 0;');
     this.#query = `DROP TABLE IF EXISTS ${name}`;
     for (let i = 0; args.length > i; ++i) {
       this.#query += ` ${args[i]}`;
     }
 
     this.exec();
-    this.raw('SET foreign_key_checks = 1;');
+    this.exec('SET foreign_key_checks = 1;');
   }
 
   /**
@@ -262,12 +261,12 @@ class ArnelifyORM {
    * @param {Array} bindings 
    * @returns 
    */
-  exec(query: null | string = null, bindings: string[] = []): ArnelifyORMRes {
+  async exec(query: null | string = null, bindings: string[] = []): Promise<ArnelifyORMRes> {
     let serialized: string = '';
     if (!query) {
       serialized = this.#lib.orm_exec(this.#query, JSON.stringify(this.#bindings));
     } else {
-      serialized = this.#lib.orm_exec(query, bindings);
+      serialized = this.#lib.orm_exec(query, JSON.stringify(bindings));
     }
 
     this.#hasHaving = false;
@@ -347,7 +346,7 @@ class ArnelifyORM {
       this.#hasHaving = true;
     }
 
-    this.#condition(arg1, arg2, arg3);
+    this.#condition(true, arg1, arg2, arg3);
     return this;
   }
 
@@ -356,17 +355,18 @@ class ArnelifyORM {
    * @param {object} args 
    * @returns 
    */
-  insert(args: { [key: string]: any }): { [key: string]: string } {
+  async insert(args: { [key: string]: any }): Promise<ArnelifyORMRes> {
     this.#query = `INSERT INTO ${this.#tableName}`;
     let columns: string = '';
     let values: string = '';
 
     let first: boolean = true;
     for (const key in args) {
-      if (!first) {
+      if (first) {
+        first = false;
+      } else {
         columns += ', ';
         values += ', ';
-        first = false;
       }
 
       columns += key;
@@ -432,7 +432,7 @@ class ArnelifyORM {
    * @param {number} offset 
    * @returns 
    */
-  limit(limit_: number, offset: number = 0): ArnelifyORMRes {
+  async limit(limit_: number, offset: number = 0): Promise<ArnelifyORMRes> {
     if (offset > 0) {
       this.#query += ` LIMIT ${offset}, ${limit_}`;
       return this.exec();
@@ -485,7 +485,7 @@ class ArnelifyORM {
       this.#hasOn = true;
     }
 
-    this.#condition(arg1, arg2, arg3);
+    this.#condition(false, arg1, arg2, arg3);
     return this;
   }
 
@@ -543,7 +543,7 @@ class ArnelifyORM {
       this.#hasHaving = true;
     }
 
-    this.#condition(arg1, arg2, arg3);
+    this.#condition(true, arg1, arg2, arg3);
     return this;
   }
 
@@ -580,7 +580,7 @@ class ArnelifyORM {
       this.#hasOn = true;
     }
 
-    this.#condition(arg1, arg2, arg3);
+    this.#condition(false, arg1, arg2, arg3);
     return this;
   }
 
@@ -617,18 +617,8 @@ class ArnelifyORM {
       this.#hasWhere = true;
     }
 
-    this.#condition(arg1, arg2, arg3);
+    this.#condition(true, arg1, arg2, arg3);
     return this;
-  }
-
-  /**
-   * Raw
-   * @param {string} query 
-   * @returns 
-   */
-  raw(query: string): { [key: string]: string } {
-    this.#query = query;
-    return this.exec();
   }
 
   /**
@@ -711,21 +701,20 @@ class ArnelifyORM {
    * @returns 
    */
   update(args: {[key: string]: any}): ArnelifyORM {
-    let columns: string = '';
-
     this.#query = 'UPDATE ';
     this.#query += this.#tableName;
     this.#query += ' SET ';
 
     let first: boolean = true;
     for (const key in args) {
-      if (!first) {
-        this.#query += ', ';
+      if (first) {
         first = false;
+      } else {
+        this.#query += ', ';
       }
 
       if (args[key] === null) {
-        this.#query += `${key} IS NULL`;
+        this.#query += `${key} = NULL`;
         continue;
       }
 
@@ -778,7 +767,7 @@ class ArnelifyORM {
         this.#hasWhere = true;
       }
   
-      this.#condition(arg1, arg2, arg3);
+      this.#condition(true, arg1, arg2, arg3);
       return this;
     }
 }

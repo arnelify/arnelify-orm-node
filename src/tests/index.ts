@@ -2,7 +2,7 @@
 
 import { ArnelifyORM, ArnelifyORMRes } from "../index";
 
-(function main(): number {
+(async function main(): Promise<number> {
 
   const db: ArnelifyORM = new ArnelifyORM({
     "ORM_DRIVER": "mysql",
@@ -36,14 +36,14 @@ import { ArnelifyORM, ArnelifyORMRes } from "../index";
     query.reference("user_id", "users", "id", ["ON DELETE CASCADE"]);
   });
 
-  res = db.table("users").insert({
+  res = await db.table("users").insert({
     email: "email@example.com"
   });
 
   const insert: string = db.toJson(res);
   console.log(`last inserted id: ${insert}`);
 
-  res = db.table("users")
+  res = await db.table("users")
     .select(["id", "email"])
     .where("id", 1)
     .limit(1);
