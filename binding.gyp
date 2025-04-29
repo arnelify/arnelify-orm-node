@@ -2,10 +2,10 @@
   "targets": [
     {
       "target_name": "arnelify-orm",
-      "sources": ["src/cpp/addon.cpp"],
+      "sources": ["src/src/addon.cpp"],
       "include_dirs": [
         "<!(node -p \"require('node-addon-api').include\")",
-        "./src/cpp",
+        "./src/src",
         "/usr/include",
         "/usr/include/jsoncpp/json"
       ],

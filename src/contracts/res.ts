@@ -1,3 +1,2 @@
-export default interface ArnelifyORMRes {
-  [key: string]: string
-}
+type MySQLRes = Array<{ [key: string]: string }>;
+export default MySQLRes;

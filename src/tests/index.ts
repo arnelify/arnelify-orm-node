@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 
-import { ArnelifyORM, ArnelifyORMRes } from "../index";
+import { MySQL, MySQLQuery, MySQLRes } from "../index";
 
 (async function main(): Promise<number> {
 
-  const db: ArnelifyORM = new ArnelifyORM({
-    "ORM_DRIVER": "mysql",
+  const db: MySQL = new MySQL({
+    "ORM_MAX_CONNECTIONS": 10,
     "ORM_HOST": "mysql",
     "ORM_NAME": "test",
     "ORM_USER": "root",
@@ -13,19 +13,22 @@ import { ArnelifyORM, ArnelifyORMRes } from "../index";
     "ORM_PORT": 3306
   });
 
-  let res: ArnelifyORMRes = {};
+  let res: MySQLRes = [];
+
+  db.connect();
+  console.log('Connected.');
 
   db.dropTable("users");
   db.dropTable("posts");
 
-  db.createTable("users", (query: ArnelifyORM): void => {
+  db.createTable("users", (query: MySQLQuery): void => {
     query.column("id", "BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY");
     query.column("email", "VARCHAR(255) UNIQUE", null);
     query.column("created_at", "DATETIME", "CURRENT_TIMESTAMP");
     query.column("updated_at", "DATETIME", null);
   });
 
-  db.createTable("posts", (query: ArnelifyORM): void => {
+  db.createTable("posts", (query: MySQLQuery): void => {
     query.column("id", "BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY");
     query.column("user_id", "BIGINT UNSIGNED", null);
     query.column("contents", "VARCHAR(2048)", null);
@@ -61,6 +64,9 @@ import { ArnelifyORM, ArnelifyORMRes } from "../index";
     .delete_()
     .where("id", 1)
     .limit(1);
+
+  db.close();
+  console.log('Closed.');
 
   return 0;
 
