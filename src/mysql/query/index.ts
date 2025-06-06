@@ -91,7 +91,7 @@ class MySQLQuery {
    * @param {string} tableName 
    * @param {CallableFunction} condition 
    */
-  alertTable(tableName: string, condition: CallableFunction): void {
+  async alertTable(tableName: string, condition: CallableFunction): Promise<void> {
     this.#query = `ALTER TABLE ${tableName} `;
     condition(this);
     for (let i = 0; this.#columns.length > i; i++) {
@@ -105,7 +105,7 @@ class MySQLQuery {
       this.#query += this.#indexes[i];
     }
 
-    this.exec();
+    await this.exec();
   }
 
   /**
@@ -148,7 +148,7 @@ class MySQLQuery {
    * @param {string} tableName
    * @param {CallableFunction} condition 
    */
-  createTable(tableName: string, condition: CallableFunction): void {
+  async createTable(tableName: string, condition: CallableFunction): Promise<void> {
     this.#query += `CREATE TABLE ${tableName} (`;
     condition(this);
     for (let i = 0; this.#columns.length > i; i++) {
@@ -163,7 +163,7 @@ class MySQLQuery {
     }
 
     this.#query += ')';
-    this.exec();
+    await this.exec();
   }
 
   /**
@@ -231,15 +231,13 @@ class MySQLQuery {
    * @param {string} name 
    * @param {Array} args 
    */
-  dropTable(name: string, args: string[] = []) {
-    this.exec('SET foreign_key_checks = 0;');
+  async dropTable(name: string, args: string[] = []): Promise<void> {
     this.#query = `DROP TABLE IF EXISTS ${name}`;
     for (let i = 0; args.length > i; ++i) {
       this.#query += ` ${args[i]}`;
     }
 
-    this.exec();
-    this.exec('SET foreign_key_checks = 1;');
+    await this.exec();
   }
 
   /**
@@ -251,8 +249,10 @@ class MySQLQuery {
   async exec(query: null | string = null, bindings: string[] = []): Promise<MySQLRes> {
     let res: MySQLRes = [];
     if (query) {
+      console.log(query);
       res = await this.#callback(query, bindings);
     } else {
+      console.log(this.#query);
       res = await this.#callback(this.#query, this.#bindings);
     }
 
@@ -267,6 +267,20 @@ class MySQLQuery {
     this.#query = '';
 
     return res;
+  }
+
+  /**
+   * Foreign Key Checks
+   * @param {boolean} on 
+   * @returns 
+   */
+  async foreignKeyChecks(on: boolean = true): Promise<void> {
+    if (on) {
+      await this.exec("SET foreign_key_checks = 1;");
+      return;
+    }
+
+    await this.exec("SET foreign_key_checks = 0;");
   }
 
   /**
@@ -598,7 +612,8 @@ class MySQLQuery {
     }
 
     if (this.#hasWhere) {
-      const hasCondition: boolean = this.#query.endsWith('?');
+      const hasCondition: boolean = this.#query.endsWith('?')
+        || this.#query.endsWith('IS NULL');
       if (hasCondition) this.#query += ' OR ';
     } else {
       this.#query += ' WHERE ';
@@ -747,7 +762,8 @@ class MySQLQuery {
     }
 
     if (this.#hasWhere) {
-      const hasCondition: boolean = this.#query.endsWith('?');
+      const hasCondition: boolean = this.#query.endsWith('?')
+        || this.#query.endsWith('IS NULL');
       if (hasCondition) this.#query += ' AND ';
     } else {
       this.#query += ' WHERE ';

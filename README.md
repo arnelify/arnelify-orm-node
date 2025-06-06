@@ -1,6 +1,6 @@
 <img src="https://static.wikia.nocookie.net/arnelify/images/c/c8/Arnelify-logo-2024.png/revision/latest?cb=20240701012515" style="width:336px;" alt="Arnelify Logo" />
 
-![Arnelify ORM for NodeJS](https://img.shields.io/badge/Arnelify%20ORM%20for%20NodeJS-0.7.0-yellow) ![C++](https://img.shields.io/badge/C++-2b-red) ![G++](https://img.shields.io/badge/G++-14.2.0-blue) ![NodeJS](https://img.shields.io/badge/NodeJS-22.13.1-green) ![Bun](https://img.shields.io/badge/Bun-1.2.0-green)
+![Arnelify ORM for NodeJS](https://img.shields.io/badge/Arnelify%20ORM%20for%20NodeJS-0.7.1-yellow) ![C++](https://img.shields.io/badge/C++-2b-red) ![G++](https://img.shields.io/badge/G++-14.2.0-blue) ![NodeJS](https://img.shields.io/badge/NodeJS-22.13.1-green) ![Bun](https://img.shields.io/badge/Bun-1.2.0-green)
 
 ## 🚀 About
 **Arnelify® ORM for NodeJS** - is a minimalistic NodeJS (Bun) Addon which is an ORM written in C and C++.

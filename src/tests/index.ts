@@ -15,20 +15,22 @@ import { MySQL, MySQLQuery, MySQLRes } from "../index";
 
   let res: MySQLRes = [];
 
-  db.connect();
+  await db.connect();
   console.log('Connected.');
 
-  db.dropTable("users");
-  db.dropTable("posts");
+  await db.foreignKeyChecks(false);
+  await db.dropTable("users");
+  await db.dropTable("posts");
+  await db.foreignKeyChecks(true);
 
-  db.createTable("users", (query: MySQLQuery): void => {
+  await db.createTable("users", (query: MySQLQuery): void => {
     query.column("id", "BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY");
     query.column("email", "VARCHAR(255) UNIQUE", null);
     query.column("created_at", "DATETIME", "CURRENT_TIMESTAMP");
     query.column("updated_at", "DATETIME", null);
   });
 
-  db.createTable("posts", (query: MySQLQuery): void => {
+  await db.createTable("posts", (query: MySQLQuery): void => {
     query.column("id", "BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY");
     query.column("user_id", "BIGINT UNSIGNED", null);
     query.column("contents", "VARCHAR(2048)", null);
@@ -54,18 +56,18 @@ import { MySQL, MySQLQuery, MySQLRes } from "../index";
   const select: string = db.toJson(res);
   console.log(`Inserted row: ${select}`);
 
-  db.table("users")
+  await db.table("users")
     .update({
       email: "user@example.com"
     }).where("id", 1)
     .limit(1);
 
-  db.table("users")
+  await db.table("users")
     .delete_()
     .where("id", 1)
     .limit(1);
 
-  db.close();
+  await db.close();
   console.log('Closed.');
 
   return 0;

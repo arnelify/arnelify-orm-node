@@ -28,14 +28,14 @@ class MySQL {
    * @param {string} tableName 
    * @param {CallableFunction} condition 
    */
-  alterTable(tableName: string, condition: CallableFunction): void {
+  async alterTable(tableName: string, condition: CallableFunction): Promise<void> {
     const builder: MySQLQuery = new MySQLQuery();
     builder.setGetUuIdCallback(() => this.getUuid());
     builder.onQuery(async (query: string, bindings: string[] = []): Promise<MySQLRes> => {
       return this.exec(query, bindings);
     });
 
-    builder.alertTable(tableName, condition);
+    await builder.alertTable(tableName, condition);
   }
 
   /**
@@ -43,35 +43,35 @@ class MySQL {
    * @param {string} tableName 
    * @param {CallableFunction} condition 
    */
-  createTable(tableName: string, condition: CallableFunction): void {
+  async createTable(tableName: string, condition: CallableFunction): Promise<void> {
     const builder: MySQLQuery = new MySQLQuery();
     builder.setGetUuIdCallback(() => this.getUuid());
     builder.onQuery(async (query: string, bindings: string[] = []): Promise<MySQLRes> => {
       return this.exec(query, bindings);
     });
 
-    builder.createTable(tableName, condition);
+    await builder.createTable(tableName, condition);
   }
 
   /**
    * Close
    */
-  close(): void {
-    this.#lib.orm_mysql_close();
+  async close(): Promise<void> {
+    await this.#lib.orm_mysql_close();
   }
 
   /**
    * Connect
    */
-  connect(): void {
-    this.#lib.orm_mysql_connect();
+  async connect(): Promise<void> {
+    await this.#lib.orm_mysql_connect();
   }
 
   /**
    * Destroy
    */
-  destroy(): void {
-    this.#lib.orm_mysql_destroy();
+  async destroy(): Promise<void> {
+    await this.#lib.orm_mysql_destroy();
   }
 
   /**
@@ -79,14 +79,14 @@ class MySQL {
    * @param {string} name 
    * @param {Array} args 
    */
-  dropTable(name: string, args: string[] = []): void {
+  async dropTable(name: string, args: string[] = []): Promise<void> {
     const builder: MySQLQuery = new MySQLQuery();
     builder.setGetUuIdCallback(() => this.getUuid());
     builder.onQuery(async (query: string, bindings: string[] = []): Promise<MySQLRes> => {
       return this.exec(query, bindings);
     });
 
-    builder.dropTable(name, args);
+    await builder.dropTable(name, args);
   }
 
   /**
@@ -97,7 +97,7 @@ class MySQL {
   */
   async exec(query: null | string = null, bindings: string[] = []): Promise<MySQLRes> {
     const fBindings: string = JSON.stringify(bindings);
-    const serialized: string = this.#lib.orm_mysql_exec(query, fBindings);
+    const serialized: string = await this.#lib.orm_mysql_exec(query, fBindings);
 
     let res: MySQLRes = [];
     try {
@@ -107,6 +107,21 @@ class MySQL {
     }
 
     return res;
+  }
+  
+  /**
+   * Foreign Key Checks
+   * @param {boolean} on 
+   * @returns 
+   */
+  async foreignKeyChecks(on: boolean = true): Promise<void> {
+    const builder: MySQLQuery = new MySQLQuery();
+    builder.setGetUuIdCallback(() => this.getUuid());
+    builder.onQuery(async (query: string, bindings: string[] = []): Promise<MySQLRes> => {
+      return this.exec(query, bindings);
+    });
+
+    await builder.foreignKeyChecks(on);
   }
 
   /**
