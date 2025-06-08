@@ -249,10 +249,8 @@ class MySQLQuery {
   async exec(query: null | string = null, bindings: string[] = []): Promise<MySQLRes> {
     let res: MySQLRes = [];
     if (query) {
-      console.log(query);
       res = await this.#callback(query, bindings);
     } else {
-      console.log(this.#query);
       res = await this.#callback(this.#query, this.#bindings);
     }
 
@@ -416,6 +414,7 @@ class MySQLQuery {
    * @returns 
    */
   join(tableName: string): MySQLQuery {
+    this.#hasOn = false;
     this.#query += ` JOIN ${tableName}`;
     return this;
   }
@@ -442,6 +441,7 @@ class MySQLQuery {
    * @returns 
    */
   leftJoin(tableName: string): MySQLQuery {
+    this.#hasOn = false;
     this.#query += ` LEFT JOIN ${tableName}`;
     return this;
   }
@@ -654,6 +654,7 @@ class MySQLQuery {
    * @returns 
    */
   rightJoin(tableName: string): MySQLQuery {
+    this.#hasOn = false;
     this.#query += ` RIGHT JOIN ${tableName}`;
     return this;
   }
